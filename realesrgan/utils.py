@@ -263,6 +263,12 @@ class RealESRGANer():
                     int(h_input * outscale),
                 ), interpolation=cv2.INTER_LANCZOS4)
 
+        # release cached device memory so it doesn't accumulate across calls
+        if self.device.type == 'cuda':
+            torch.cuda.empty_cache()
+        elif self.device.type == 'mps':
+            torch.mps.empty_cache()
+
         return output, img_mode
 
 

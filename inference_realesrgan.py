@@ -2,6 +2,7 @@ import argparse
 import cv2
 import glob
 import os
+import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.download_util import load_file_from_url
 
@@ -147,7 +148,11 @@ def main():
                 output, _ = upsampler.enhance(img, outscale=args.outscale)
         except RuntimeError as error:
             print('Error', error)
-            print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
+            print('If you encounter CUDA/MPS out of memory, try to set --tile with a smaller number, e.g. --tile 200.')
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            elif torch.backends.mps.is_available():
+                torch.mps.empty_cache()
         else:
             if args.ext == 'auto':
                 extension = extension[1:]
